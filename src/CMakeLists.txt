@@ -1,48 +1,19 @@
 cmake_minimum_required(VERSION 3.1)
 
+set(LIB libsgm_cuda)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+
+find_package(OpenCV REQUIRED)
 find_package(CUDA REQUIRED)
-
-if(DEFINED AUTO_DETECT_ARCH AND "${AUTO_DETECT_ARCH}")
-	CUDA_SELECT_NVCC_ARCH_FLAGS(ARCH_FLAGS "Auto")
-	set(CUDA_ARCH "${ARCH_FLAGS}" CACHE STRING "Value of the NVCC -arch option." FORCE)
-endif()
-message(STATUS "CUDA_ARCH: \"${CUDA_ARCH}\"")
-
-include_directories(../include)
-
-if (CMAKE_COMPILER_IS_GNUCXX)
-	set(CMAKE_CXX_FLAGS "-O3 -Wall")
-	set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++11")
-endif()
 
 SET(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} ${CUDA_ARCH}")
 
 file(GLOB STEREOSRCS "*.cu" "*.cpp")
 
-if(LIBSGM_SHARED)
-	CUDA_ADD_LIBRARY(sgm stereo_sgm.cpp ${STEREOSRCS} SHARED)
-	target_link_libraries(sgm ${CUDA_LIBRARIES})
-	if(BUILD_OPENCV_WRAPPER)
-		target_link_libraries(sgm ${OpenCV_LIBS})
-	endif()
-else()
-	CUDA_ADD_LIBRARY(sgm stereo_sgm.cpp ${STEREOSRCS} STATIC)
-endif()
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${OpenCV_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
 
-install(
-	TARGETS sgm
-	ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
-	LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
-	RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
-)
+CUDA_ADD_LIBRARY(${LIB} ${STEREOSRCS} STATIC)
 
-install(
-	DIRECTORY ${PROJECT_SOURCE_DIR}/include
-	DESTINATION ${CMAKE_INSTALL_PREFIX}
-	FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
-)
-
-install(
-	FILES ${PROJECT_SOURCE_DIR}/FindLibSGM.cmake
-	DESTINATION ${CMAKE_INSTALL_PREFIX}
-)
+target_include_directories(${LIB} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>")
+target_link_libraries(${LIB} ${OpenCV_LIBS})

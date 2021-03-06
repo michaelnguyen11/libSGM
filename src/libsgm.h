@@ -26,22 +26,6 @@ limitations under the License.
 * stereo-sgm main header
 */
 
-#include "libsgm_config.h"
-
-#if defined(LIBSGM_SHARED)
-	#if defined(WIN32) || defined(_WIN32)
-		#if defined sgm_EXPORTS
-			#define LIBSGM_API __declspec(dllexport)
-		#else
-			#define LIBSGM_API __declspec(dllimport)
-		#endif
-	#else
-		#define LIBSGM_API __attribute__((visibility("default")))
-	#endif
-#else
-	#define LIBSGM_API
-#endif
-
 namespace sgm {
 	struct CudaStereoSGMResources;
 
@@ -115,7 +99,7 @@ namespace sgm {
 		* @attention
 		* output_depth_bits must be set to 16 when subpixel is enabled.
 		*/
-		LIBSGM_API StereoSGM(int width, int height, int disparity_size, int input_depth_bits, int output_depth_bits, 
+		StereoSGM(int width, int height, int disparity_size, int input_depth_bits, int output_depth_bits, 
 			EXECUTE_INOUT inout_type, const Parameters& param = Parameters());
 
 		/**
@@ -130,10 +114,10 @@ namespace sgm {
 		* @attention
 		* output_depth_bits must be set to 16 when subpixel is enabled.
 		*/
-		LIBSGM_API StereoSGM(int width, int height, int disparity_size, int input_depth_bits, int output_depth_bits, int src_pitch, int dst_pitch,
+		StereoSGM(int width, int height, int disparity_size, int input_depth_bits, int output_depth_bits, int src_pitch, int dst_pitch,
 			EXECUTE_INOUT inout_type, const Parameters& param = Parameters());
 
-		LIBSGM_API virtual ~StereoSGM();
+		virtual ~StereoSGM();
 
 		/**
 		* Execute stereo semi global matching.
@@ -146,7 +130,7 @@ namespace sgm {
 		* Note that dst element value would be multiplied StereoSGM::SUBPIXEL_SCALE if subpixel option was enabled.
 		* Value of Invalid disparity is equal to return value of `get_invalid_disparity` member function.
 		*/
-		LIBSGM_API void execute(const void* left_pixels, const void* right_pixels, void* dst);
+		void execute(const void* left_pixels, const void* right_pixels, void* dst);
 
 		/**
 		* Generate invalid disparity value from Parameter::min_disp and Parameter::subpixel
@@ -154,7 +138,7 @@ namespace sgm {
 		* Cast properly if you receive disparity value as `unsigned` type.
 		* See sample/movie for an example of this.
 		*/
-		LIBSGM_API int get_invalid_disparity() const;
+		int get_invalid_disparity() const;
 
 	private:
 		StereoSGM(const StereoSGM&);
@@ -177,3 +161,4 @@ namespace sgm {
 }
 
 #include "libsgm_wrapper.h"
+
